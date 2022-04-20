@@ -26,19 +26,12 @@ test("Parsing Price Feed works as expected", () => {
   expect(priceFeed.numPublishers).toBe(5);
   expect(priceFeed.productId).toBe("0123456789abcdef");
   expect(priceFeed.publishTime).toBe(11);
-  expect(priceFeed.getCurrentPrice()).toStrictEqual<Price>({
-    conf: "1",
-    price: "10",
-    expo: 4,
-  });
-  expect(priceFeed.getEmaPrice()).toStrictEqual<Price>({
-    conf: "2",
-    price: "3",
-    expo: 4,
-  });
-  expect(priceFeed.getPrevPriceUnchecked()).toStrictEqual<
-    [Price, UnixTimestamp]
-  >([{ conf: "7", price: "8", expo: 4 }, 9]);
+  expect(priceFeed.getCurrentPrice()).toStrictEqual(new Price("1", 4, "10"));
+  expect(priceFeed.getEmaPrice()).toStrictEqual(new Price("2", 4, "3"));
+  expect(priceFeed.getPrevPriceUnchecked()).toStrictEqual([
+    new Price("7", 4, "8"),
+    9,
+  ]);
 
   expect(priceFeed.toJson()).toStrictEqual(data);
 });

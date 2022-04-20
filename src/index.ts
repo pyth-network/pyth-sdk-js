@@ -6,11 +6,35 @@ export type HexString = string;
 /**
  * A Pyth Price represented as `${price} ± ${conf} * 10^${expo}
  */
-export type Price = {
-  price: string;
+export class Price {
   conf: string;
   expo: number;
-};
+  price: string;
+
+  constructor(conf: string, expo: number, price: string) {
+    this.conf = conf;
+    this.expo = expo;
+    this.price = price;
+  }
+
+  /**
+   * Get price as number. Warning: this conversion might result in an inaccurate number.
+   *
+   * @returns a floating point number representing the price
+   */
+  priceAsNumberUnchecked(): number {
+    return Number(this.price) * 10 ** this.expo;
+  }
+
+  /**
+   * Get price as number. Warning: this conversion might result in an inaccurate number.
+   *
+   * @returns a floating point number representing the price
+   */
+  confAsNumberUnchecked(): number {
+    return Number(this.conf) * 10 ** this.expo;
+  }
+}
 
 /**
  * Status of price (Trading is valid).
@@ -155,37 +179,52 @@ export class PriceFeed {
       price: this.price,
       product_id: this.productId,
       publish_time: this.publishTime,
-      status: this.status
-    }
+      status: this.status,
+    };
     return Convert.priceFeedToJson(jsonFeed);
   }
 
+  /**
+   * Get the current price and confidence interval as fixed-point numbers of the form a * 10^e.
+   *
+   * @returns a struct containing the current price, confidence interval, and the exponent for
+   * both numbers. Returns `undefined` if price information is currently unavailable for any reason.
+   */
   getCurrentPrice(): Price | undefined {
     if (this.status !== PriceStatus.Trading) {
       return undefined;
     }
-    return {
-      price: this.price,
-      conf: this.conf,
-      expo: this.expo,
-    };
+
+    return new Price(this.conf, this.expo, this.price);
   }
 
+  /**
+   * Get the exponentially-weighted moving average price (ema_price) and a confidence interval on the result.
+   *
+   * @returns a struct containing the ema price, confidence interval, and the exponent for
+   * both numbers. Returns `undefined` if price information is currently unavailable for any reason.
+   *
+   * At the moment, the confidence interval returned by this method is computed in
+   * a somewhat questionable way, so we do not recommend using it for high-value applications.
+   */
   getEmaPrice(): Price | undefined {
-    return {
-      price: this.emaPrice,
-      conf: this.emaConf,
-      expo: this.expo,
-    };
+    return new Price(this.emaConf, this.expo, this.emaPrice);
   }
 
+  /**
+   * Get the "unchecked" previous price with Trading status, along with the timestamp at which it was generated.
+   *
+   * @returns a struct containing the previous price, confidence interval, and the exponent for
+   * both numbers along with the timestamp that the price was generated.
+   *
+   * WARNING:
+   * We make no guarantees about the unchecked price and confidence returned by
+   * this function: it could differ significantly from the current price.
+   * We strongly encourage you to use `get_current_price` instead.
+   */
   getPrevPriceUnchecked(): [Price, UnixTimestamp] {
     return [
-      {
-        price: this.prevPrice,
-        conf: this.prevConf,
-        expo: this.expo,
-      },
+      new Price(this.prevConf, this.expo, this.prevPrice),
       this.prevPublishTime,
     ];
   }
