@@ -18,7 +18,7 @@ test("Parsing Price Feed works as expected", () => {
     status: PriceStatus.Trading,
   };
 
-  const priceFeed = new PriceFeed(data);
+  const priceFeed = PriceFeed.fromJson(data);
   expect(priceFeed.status).toBe(PriceStatus.Trading);
   expect(priceFeed.expo).toBe(4);
   expect(priceFeed.id).toBe("abcdef0123456789");
@@ -39,6 +39,8 @@ test("Parsing Price Feed works as expected", () => {
   expect(priceFeed.getPrevPriceUnchecked()).toStrictEqual<
     [Price, UnixTimestamp]
   >([{ conf: "7", price: "8", expo: 4 }, 9]);
+
+  expect(priceFeed.toJson()).toStrictEqual(data);
 });
 
 test("getCurrentPrice returns undefined if status is not Trading", () => {
@@ -59,6 +61,6 @@ test("getCurrentPrice returns undefined if status is not Trading", () => {
     status: PriceStatus.Unknown,
   };
 
-  const priceFeed = new PriceFeed(data);
+  const priceFeed = PriceFeed.fromJson(data);
   expect(priceFeed.getCurrentPrice()).toBeUndefined();
 });

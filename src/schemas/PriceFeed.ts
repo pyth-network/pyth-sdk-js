@@ -1,4 +1,4 @@
-// This code is generated using quicktype with Camel naming style and "Any" raw input type.
+// This code is generated automatically using quicktype with default configuration and json verification.
 /* tslint:disable */
 
 // To parse this data:
@@ -21,11 +21,11 @@ export interface PriceFeed {
   /**
    * Exponentially moving average confidence interval.
    */
-  emaConf: string;
+  ema_conf: string;
   /**
    * Exponentially moving average price.
    */
-  emaPrice: string;
+  ema_price: string;
   /**
    * Price exponent.
    */
@@ -37,23 +37,23 @@ export interface PriceFeed {
   /**
    * Maximum number of allowed publishers that can contribute to a price.
    */
-  maxNumPublishers: number;
+  max_num_publishers: number;
   /**
    * Number of publishers that made up current aggregate.
    */
-  numPublishers: number;
+  num_publishers: number;
   /**
    * Confidence interval of previous aggregate with Trading status.
    */
-  prevConf: string;
+  prev_conf: string;
   /**
    * Price of previous aggregate with Trading status.
    */
-  prevPrice: string;
+  prev_price: string;
   /**
    * Publish time of previous aggregate with Trading status.
    */
-  prevPublishTime: number;
+  prev_publish_time: number;
   /**
    * The current aggregation price.
    */
@@ -61,11 +61,11 @@ export interface PriceFeed {
   /**
    * Product account key.
    */
-  productId: string;
+  product_id: string;
   /**
    * Current price aggregation publish time
    */
-  publishTime: number;
+  publish_time: number;
   /**
    * Status of price (Trading is valid).
    */
@@ -247,18 +247,18 @@ const typeMap: any = {
   PriceFeed: o(
     [
       { json: "conf", js: "conf", typ: "" },
-      { json: "ema_conf", js: "emaConf", typ: "" },
-      { json: "ema_price", js: "emaPrice", typ: "" },
+      { json: "ema_conf", js: "ema_conf", typ: "" },
+      { json: "ema_price", js: "ema_price", typ: "" },
       { json: "expo", js: "expo", typ: 0 },
       { json: "id", js: "id", typ: "" },
-      { json: "max_num_publishers", js: "maxNumPublishers", typ: 0 },
-      { json: "num_publishers", js: "numPublishers", typ: 0 },
-      { json: "prev_conf", js: "prevConf", typ: "" },
-      { json: "prev_price", js: "prevPrice", typ: "" },
-      { json: "prev_publish_time", js: "prevPublishTime", typ: 0 },
+      { json: "max_num_publishers", js: "max_num_publishers", typ: 0 },
+      { json: "num_publishers", js: "num_publishers", typ: 0 },
+      { json: "prev_conf", js: "prev_conf", typ: "" },
+      { json: "prev_price", js: "prev_price", typ: "" },
+      { json: "prev_publish_time", js: "prev_publish_time", typ: 0 },
       { json: "price", js: "price", typ: "" },
-      { json: "product_id", js: "productId", typ: "" },
-      { json: "publish_time", js: "publishTime", typ: 0 },
+      { json: "product_id", js: "product_id", typ: "" },
+      { json: "publish_time", js: "publish_time", typ: 0 },
       { json: "status", js: "status", typ: r("PriceStatus") },
     ],
     "any"

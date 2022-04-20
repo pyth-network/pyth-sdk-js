@@ -1,4 +1,4 @@
-import { Convert, PriceFeed as InternalPriceFeed } from "./schemas/PriceFeed";
+import { Convert, PriceFeed as JsonPriceFeed } from "./schemas/PriceFeed";
 
 export type UnixTimestamp = number;
 export type HexString = string;
@@ -88,22 +88,76 @@ export class PriceFeed {
    */
   status: PriceStatus;
 
-  constructor(json: any) {
-    const feed: InternalPriceFeed = Convert.toPriceFeed(json);
-    this.conf = feed.conf;
-    this.emaConf = feed.emaConf;
-    this.emaPrice = feed.emaPrice;
-    this.expo = feed.expo;
-    this.id = feed.id;
-    this.maxNumPublishers = feed.maxNumPublishers;
-    this.numPublishers = feed.numPublishers;
-    this.prevConf = feed.prevConf;
-    this.prevPrice = feed.prevPrice;
-    this.prevPublishTime = feed.prevPublishTime;
-    this.price = feed.price;
-    this.productId = feed.productId;
-    this.publishTime = feed.publishTime;
-    this.status = feed.status;
+  constructor(
+    conf: string,
+    emaConf: string,
+    emaPrice: string,
+    expo: number,
+    id: HexString,
+    maxNumPublishers: number,
+    numPublishers: number,
+    prevConf: string,
+    prevPrice: string,
+    prevPublishTime: UnixTimestamp,
+    price: string,
+    productId: HexString,
+    publishTime: UnixTimestamp,
+    status: PriceStatus
+  ) {
+    this.conf = conf;
+    this.emaConf = emaConf;
+    this.emaPrice = emaPrice;
+    this.expo = expo;
+    this.id = id;
+    this.maxNumPublishers = maxNumPublishers;
+    this.numPublishers = numPublishers;
+    this.prevConf = prevConf;
+    this.prevPrice = prevPrice;
+    this.prevPublishTime = prevPublishTime;
+    this.price = price;
+    this.productId = productId;
+    this.publishTime = publishTime;
+    this.status = status;
+  }
+
+  static fromJson(json: any): PriceFeed {
+    const jsonFeed: JsonPriceFeed = Convert.toPriceFeed(json);
+    return new PriceFeed(
+      jsonFeed.conf,
+      jsonFeed.ema_conf,
+      jsonFeed.ema_price,
+      jsonFeed.expo,
+      jsonFeed.id,
+      jsonFeed.max_num_publishers,
+      jsonFeed.num_publishers,
+      jsonFeed.prev_conf,
+      jsonFeed.prev_price,
+      jsonFeed.prev_publish_time,
+      jsonFeed.price,
+      jsonFeed.product_id,
+      jsonFeed.publish_time,
+      jsonFeed.status
+    );
+  }
+
+  toJson(): any {
+    const jsonFeed: JsonPriceFeed = {
+      conf: this.conf,
+      ema_conf: this.emaConf,
+      ema_price: this.emaPrice,
+      expo: this.expo,
+      id: this.id,
+      max_num_publishers: this.maxNumPublishers,
+      num_publishers: this.numPublishers,
+      prev_conf: this.prevConf,
+      prev_price: this.prevPrice,
+      prev_publish_time: this.prevPublishTime,
+      price: this.price,
+      product_id: this.productId,
+      publish_time: this.publishTime,
+      status: this.status
+    }
+    return Convert.priceFeedToJson(jsonFeed);
   }
 
   getCurrentPrice(): Price | undefined {
