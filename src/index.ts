@@ -112,56 +112,56 @@ export class PriceFeed {
    */
   status: PriceStatus;
 
-  constructor(
-    conf: string,
-    emaConf: string,
-    emaPrice: string,
-    expo: number,
-    id: HexString,
-    maxNumPublishers: number,
-    numPublishers: number,
-    prevConf: string,
-    prevPrice: string,
-    prevPublishTime: UnixTimestamp,
-    price: string,
-    productId: HexString,
-    publishTime: UnixTimestamp,
-    status: PriceStatus
-  ) {
-    this.conf = conf;
-    this.emaConf = emaConf;
-    this.emaPrice = emaPrice;
-    this.expo = expo;
-    this.id = id;
-    this.maxNumPublishers = maxNumPublishers;
-    this.numPublishers = numPublishers;
-    this.prevConf = prevConf;
-    this.prevPrice = prevPrice;
-    this.prevPublishTime = prevPublishTime;
-    this.price = price;
-    this.productId = productId;
-    this.publishTime = publishTime;
-    this.status = status;
+  constructor(rawValues: {
+    conf: string;
+    emaConf: string;
+    emaPrice: string;
+    expo: number;
+    id: HexString;
+    maxNumPublishers: number;
+    numPublishers: number;
+    prevConf: string;
+    prevPrice: string;
+    prevPublishTime: UnixTimestamp;
+    price: string;
+    productId: HexString;
+    publishTime: UnixTimestamp;
+    status: PriceStatus;
+  }) {
+    this.conf = rawValues.conf;
+    this.emaConf = rawValues.emaConf;
+    this.emaPrice = rawValues.emaPrice;
+    this.expo = rawValues.expo;
+    this.id = rawValues.id;
+    this.maxNumPublishers = rawValues.maxNumPublishers;
+    this.numPublishers = rawValues.numPublishers;
+    this.prevConf = rawValues.prevConf;
+    this.prevPrice = rawValues.prevPrice;
+    this.prevPublishTime = rawValues.prevPublishTime;
+    this.price = rawValues.price;
+    this.productId = rawValues.productId;
+    this.publishTime = rawValues.publishTime;
+    this.status = rawValues.status;
   }
 
   static fromJson(json: any): PriceFeed {
     const jsonFeed: JsonPriceFeed = Convert.toPriceFeed(json);
-    return new PriceFeed(
-      jsonFeed.conf,
-      jsonFeed.ema_conf,
-      jsonFeed.ema_price,
-      jsonFeed.expo,
-      jsonFeed.id,
-      jsonFeed.max_num_publishers,
-      jsonFeed.num_publishers,
-      jsonFeed.prev_conf,
-      jsonFeed.prev_price,
-      jsonFeed.prev_publish_time,
-      jsonFeed.price,
-      jsonFeed.product_id,
-      jsonFeed.publish_time,
-      jsonFeed.status
-    );
+    return new PriceFeed({
+      conf: jsonFeed.conf,
+      emaConf: jsonFeed.ema_conf,
+      emaPrice: jsonFeed.ema_price,
+      expo: jsonFeed.expo,
+      id: jsonFeed.id,
+      maxNumPublishers: jsonFeed.max_num_publishers,
+      numPublishers: jsonFeed.num_publishers,
+      prevConf: jsonFeed.prev_conf,
+      prevPrice: jsonFeed.prev_price,
+      prevPublishTime: jsonFeed.prev_publish_time,
+      price: jsonFeed.price,
+      productId: jsonFeed.product_id,
+      publishTime: jsonFeed.publish_time,
+      status: jsonFeed.status,
+    });
   }
 
   toJson(): any {
