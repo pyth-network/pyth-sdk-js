@@ -1,6 +1,3 @@
-// This code is generated automatically using quicktype with default configuration and json verification.
-/* tslint:disable */
-
 // To parse this data:
 //
 //   import { Convert, PriceFeed } from "./file";
