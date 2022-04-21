@@ -14,7 +14,7 @@
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\"",
     "gen-ts-schema": "quicktype --src-lang schema src/schemas/price_feed.json -o src/schemas/PriceFeed.ts --raw-type any && prettier --write \"src/schemas/*.ts\"",
-    "lint": "tslint -p tsconfig.json",
+    "lint": "eslint src/",
     "prepare": "npm run build",
     "prepublishOnly": "npm test && npm run lint",
     "preversion": "npm run lint",
@@ -28,11 +28,13 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@types/jest": "^27.4.1",
+    "@typescript-eslint/eslint-plugin": "^5.20.0",
+    "@typescript-eslint/parser": "^5.20.0",
+    "eslint": "^8.13.0",
     "jest": "^27.5.1",
     "prettier": "^2.6.2",
     "quicktype": "^15.0.261",
     "ts-jest": "^27.1.4",
-    "tslint": "^6.1.3",
-    "tslint-config-prettier": "^1.18.0"
+    "typescript": "^4.6.3"
   }
 }

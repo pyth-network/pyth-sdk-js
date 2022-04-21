@@ -148,6 +148,7 @@ export class PriceFeed {
     this.status = rawValues.status;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static fromJson(json: any): PriceFeed {
     const jsonFeed: JsonPriceFeed = Convert.toPriceFeed(json);
     return new PriceFeed({
@@ -168,6 +169,7 @@ export class PriceFeed {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   toJson(): any {
     const jsonFeed: JsonPriceFeed = {
       conf: this.conf,

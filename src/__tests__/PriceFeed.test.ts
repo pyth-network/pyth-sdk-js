@@ -1,4 +1,4 @@
-import { Price, PriceFeed, PriceStatus, UnixTimestamp } from "../index";
+import { Price, PriceFeed, PriceStatus } from "../index";
 
 test("Parsing Price Feed works as expected", () => {
   const data = {
