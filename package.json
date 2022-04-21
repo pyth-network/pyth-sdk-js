@@ -1,5 +1,5 @@
 {
-  "name": "@pythnetwork/sdk",
+  "name": "@pythnetwork/pyth-sdk-js",
   "version": "0.1.0",
   "description": "Pyth Network SDK in JS",
   "homepage": "https://pyth.network",
