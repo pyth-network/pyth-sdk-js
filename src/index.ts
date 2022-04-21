@@ -19,19 +19,23 @@ export class Price {
 
   /**
    * Get price as number. Warning: this conversion might result in an inaccurate number.
+   * We store price and confidence values in our Oracle at 64-bit precision, but the JavaScript
+   * number type can only represent numbers with 52-bit precision. So if a price or confidence
+   * is larger than 52-bits, the conversion will lose the most insignificant bits.
    *
    * @returns a floating point number representing the price
    */
-  priceAsNumberUnchecked(): number {
+  getPriceAsNumberUnchecked(): number {
     return Number(this.price) * 10 ** this.expo;
   }
 
   /**
    * Get price as number. Warning: this conversion might result in an inaccurate number.
+   * Explanation is the same as `priceAsNumberUnchecked()` documentation.
    *
    * @returns a floating point number representing the price
    */
-  confAsNumberUnchecked(): number {
+  getConfAsNumberUnchecked(): number {
     return Number(this.conf) * 10 ** this.expo;
   }
 }
