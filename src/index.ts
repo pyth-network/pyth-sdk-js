@@ -227,6 +227,12 @@ export class PriceFeed {
    * We strongly encourage you to use `get_current_price` instead.
    */
   getPrevPriceUnchecked(): [Price, UnixTimestamp] {
+    // If the price status is Trading then it's the latest price
+    // with the Trading status.
+    if (this.status === PriceStatus.Trading) {
+      return [new Price(this.conf, this.expo, this.price), this.publishTime];
+    }
+
     return [
       new Price(this.prevConf, this.expo, this.prevPrice),
       this.prevPublishTime,

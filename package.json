@@ -1,6 +1,6 @@
 {
   "name": "@pythnetwork/pyth-sdk-js",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Pyth Network SDK in JS",
   "homepage": "https://pyth.network",
   "main": "lib/index.js",
