@@ -1,6 +1,7 @@
 import { Convert, PriceFeed as JsonPriceFeed } from "./schemas/PriceFeed";
 
 export type UnixTimestamp = number;
+export type DurationInSeconds = number;
 export type HexString = string;
 
 /**
@@ -216,17 +217,16 @@ export class PriceFeed {
   }
 
   /**
-   * Get the "unchecked" previous price with Trading status, along with the timestamp at which it was generated.
+   * Get the "unchecked" latest available price, along with the timestamp at which it was generated.
    *
-   * @returns a struct containing the previous price, confidence interval, and the exponent for
+   * @returns a struct containing the latest available price, confidence interval, and the exponent for
    * both numbers along with the timestamp that the price was generated.
    *
    * WARNING:
    * We make no guarantees about the unchecked price and confidence returned by
-   * this function: it could differ significantly from the current price.
-   * We strongly encourage you to use `get_current_price` instead.
+   * this function: We strongly encourage you to use `get_current_price`when possible.
    */
-  getPrevPriceUnchecked(): [Price, UnixTimestamp] {
+  getLatestAvailablePriceUnchecked(): [Price, UnixTimestamp] {
     // If the price status is Trading then it's the latest price
     // with the Trading status.
     if (this.status === PriceStatus.Trading) {
@@ -237,5 +237,20 @@ export class PriceFeed {
       new Price(this.prevConf, this.expo, this.prevPrice),
       this.prevPublishTime,
     ];
+  }
+
+  getLatestAvailablePriceWithinDuration(duration: DurationInSeconds): Price | undefined {
+    const [price, timestamp] = this.getLatestAvailablePriceUnchecked();
+
+    const currentTime: UnixTimestamp = Math.floor(Date.now() / 1000);
+  
+    // This checks the absolute difference as a sanity check
+    // for the cases that the system time is behind or price
+    // feed timestamp happen to be in the future (a bug). 
+    if (Math.abs(currentTime - timestamp) > duration) {
+      return undefined;
+    }
+
+    return price;
   }
 }
