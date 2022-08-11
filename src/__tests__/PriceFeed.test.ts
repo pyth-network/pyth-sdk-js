@@ -1,5 +1,9 @@
 import { Price, PriceFeed, PriceStatus } from "../index";
 
+beforeAll(() => {
+  jest.useFakeTimers();
+});
+
 test("Parsing Price Feed works as expected", () => {
   const data = {
     conf: "1",
@@ -28,11 +32,17 @@ test("Parsing Price Feed works as expected", () => {
   expect(priceFeed.publishTime).toBe(11);
   expect(priceFeed.getCurrentPrice()).toStrictEqual(new Price("1", 4, "10"));
   expect(priceFeed.getEmaPrice()).toStrictEqual(new Price("2", 4, "3"));
-  expect(priceFeed.getPrevPriceUnchecked()).toStrictEqual([
-    new Price("7", 4, "8"),
-    9,
+  expect(priceFeed.getLatestAvailablePriceUnchecked()).toStrictEqual([
+    new Price("1", 4, "10"),
+    11,
   ]);
 
+  jest.setSystemTime(20000);
+  expect(priceFeed.getLatestAvailablePriceWithinDuration(15)).toStrictEqual(
+    new Price("1", 4, "10")
+  );
+  expect(priceFeed.getLatestAvailablePriceWithinDuration(5)).toBeUndefined();
+  
   expect(priceFeed.toJson()).toStrictEqual(data);
 });
 
@@ -56,4 +66,36 @@ test("getCurrentPrice returns undefined if status is not Trading", () => {
 
   const priceFeed = PriceFeed.fromJson(data);
   expect(priceFeed.getCurrentPrice()).toBeUndefined();
+});
+
+test("getLatestAvailablePrice returns prevPrice when status is not Trading", () => {
+  const data = {
+    conf: "1",
+    ema_conf: "2",
+    ema_price: "3",
+    expo: 4,
+    id: "abcdef0123456789",
+    max_num_publishers: 6,
+    num_publishers: 5,
+    prev_conf: "7",
+    prev_price: "8",
+    prev_publish_time: 9,
+    price: "10",
+    product_id: "0123456789abcdef",
+    publish_time: 11,
+    status: PriceStatus.Unknown,
+  };
+
+  const priceFeed = PriceFeed.fromJson(data);
+
+  expect(priceFeed.getLatestAvailablePriceUnchecked()).toStrictEqual([
+    new Price("7", 4, "8"),
+    9,
+  ]);
+
+  jest.setSystemTime(20000);
+  expect(priceFeed.getLatestAvailablePriceWithinDuration(15)).toStrictEqual(
+    new Price("7", 4, "8")
+  );
+  expect(priceFeed.getLatestAvailablePriceWithinDuration(10)).toBeUndefined();
 });
