@@ -1,6 +1,7 @@
 import { Convert, PriceFeed as JsonPriceFeed } from "./schemas/PriceFeed";
 
 export type UnixTimestamp = number;
+export type DurationInSeconds = number;
 export type HexString = string;
 
 /**
@@ -190,9 +191,14 @@ export class PriceFeed {
 
   /**
    * Get the current price and confidence interval as fixed-point numbers of the form a * 10^e.
+   * This function returns the current best estimate of the price at the time that this `PriceFeed` was
+   * published (`publish_time`). This function returns `undefined` if the oracle was unable to determine
+   * the price at that time; this condition can happen for various reasons, such as certain markets only
+   * trading during certain times.
    *
-   * @returns a struct containing the current price, confidence interval, and the exponent for
-   * both numbers. Returns `undefined` if price information is currently unavailable for any reason.
+   * @returns a struct containing the price and confidence interval as of `publish_time`, along with
+   * the exponent for both numbers. Returns `undefined` if price information is currently unavailable
+   * for any reason.
    */
   getCurrentPrice(): Price | undefined {
     if (this.status !== PriceStatus.Trading) {
@@ -216,20 +222,55 @@ export class PriceFeed {
   }
 
   /**
-   * Get the "unchecked" previous price with Trading status, along with the timestamp at which it was generated.
+   * Get the latest available price, along with the timestamp when it was generated.
+   * This function returns the same price as `getCurrentPrice` in the case where a price was available
+   * at the time this `PriceFeed` was published (`publish_time`). However, if a price was not available
+   * at that time, this function returns the price from the latest time at which the price was available.
+   * The returned price can be from arbitrarily far in the past; this function makes no guarantees that
+   * the returned price is recent or useful for any particular application.
    *
-   * @returns a struct containing the previous price, confidence interval, and the exponent for
-   * both numbers along with the timestamp that the price was generated.
+   * Users of this function should check the returned timestamp to ensure that the returned price is
+   * sufficiently recent for their application. If you are considering using this function, it may be
+   * safer / easier to use either `getCurrentPrice` or `getLatestAvailablePriceWithinDuration`.
    *
-   * WARNING:
-   * We make no guarantees about the unchecked price and confidence returned by
-   * this function: it could differ significantly from the current price.
-   * We strongly encourage you to use `get_current_price` instead.
+   * @returns a struct containing the latest available price, confidence interval, and the exponent for
+   * both numbers along with the timestamp when that price was generated.
    */
-  getPrevPriceUnchecked(): [Price, UnixTimestamp] {
+  getLatestAvailablePriceUnchecked(): [Price, UnixTimestamp] {
+    // If the price status is Trading then it's the latest price
+    // with the Trading status.
+    if (this.status === PriceStatus.Trading) {
+      return [new Price(this.conf, this.expo, this.price), this.publishTime];
+    }
+
     return [
       new Price(this.prevConf, this.expo, this.prevPrice),
       this.prevPublishTime,
     ];
+  }
+
+  /**
+   * Get the latest price as long as it was updated within `duration` seconds of the current time.
+   * This function is a sanity-checked version of `getLatestAvailablePriceUnchecked` which is useful in
+   * applications that require a sufficiently-recent price. Returns `undefined` if the price wasn't
+   * updated sufficiently recently.
+   *
+   * @param duration return a price as long as it has been updated within this number of seconds
+   * @returns a struct containing the latest available price, confidence interval and the exponent for
+   * both numbers, or `undefined` if no price update occurred within `duration` seconds of the current time.
+   */
+  getLatestAvailablePriceWithinDuration(duration: DurationInSeconds): Price | undefined {
+    const [price, timestamp] = this.getLatestAvailablePriceUnchecked();
+
+    const currentTime: UnixTimestamp = Math.floor(Date.now() / 1000);
+  
+    // This checks the absolute difference as a sanity check
+    // for the cases that the system time is behind or price
+    // feed timestamp happen to be in the future (a bug). 
+    if (Math.abs(currentTime - timestamp) > duration) {
+      return undefined;
+    }
+
+    return price;
   }
 }
