@@ -54,6 +54,36 @@ export enum PriceStatus {
 }
 
 /**
+ * Metadata about the price
+ *
+ * Represents metadata of a price feed.
+ */
+export class PriceFeedMetadata {
+  /**
+   * Attestation time of the price
+   */
+  attestation_time: number;
+  /**
+   * Chain of the emitter
+   */
+  emitter_chain: number;
+  /**
+   * Sequence number of the price
+   */
+  sequence_number: number;
+
+  constructor(metadata: {
+    attestation_time: number;
+    emitter_chain: number;
+    sequence_number: number;
+  }) {
+    this.attestation_time = metadata.attestation_time;
+    this.emitter_chain = metadata.emitter_chain;
+    this.sequence_number = metadata.sequence_number;
+  }
+}
+
+/**
  * Pyth Price Feed
  *
  * Represents a current aggregation price from pyth publisher feeds.
@@ -84,6 +114,10 @@ export class PriceFeed {
    * Maximum number of allowed publishers that can contribute to a price.
    */
   maxNumPublishers: number;
+  /**
+   * Metadata about the price
+   */
+  metadata?: PriceFeedMetadata;
   /**
    * Number of publishers that made up current aggregate.
    */
@@ -124,6 +158,7 @@ export class PriceFeed {
     expo: number;
     id: HexString;
     maxNumPublishers: number;
+    metadata?: PriceFeedMetadata;
     numPublishers: number;
     prevConf: string;
     prevPrice: string;
@@ -139,6 +174,7 @@ export class PriceFeed {
     this.expo = rawValues.expo;
     this.id = rawValues.id;
     this.maxNumPublishers = rawValues.maxNumPublishers;
+    this.metadata = rawValues.metadata;
     this.numPublishers = rawValues.numPublishers;
     this.prevConf = rawValues.prevConf;
     this.prevPrice = rawValues.prevPrice;
@@ -158,6 +194,7 @@ export class PriceFeed {
       expo: jsonFeed.expo,
       id: jsonFeed.id,
       maxNumPublishers: jsonFeed.max_num_publishers,
+      metadata: jsonFeed.metadata,
       numPublishers: jsonFeed.num_publishers,
       prevConf: jsonFeed.prev_conf,
       prevPrice: jsonFeed.prev_price,
@@ -177,6 +214,7 @@ export class PriceFeed {
       expo: this.expo,
       id: this.id,
       max_num_publishers: this.maxNumPublishers,
+      metadata: this.metadata,
       num_publishers: this.numPublishers,
       prev_conf: this.prevConf,
       prev_price: this.prevPrice,
@@ -186,6 +224,7 @@ export class PriceFeed {
       publish_time: this.publishTime,
       status: this.status,
     };
+    // this is done to avoid sending undefined values to the server
     return Convert.priceFeedToJson(jsonFeed);
   }
 
@@ -259,18 +298,33 @@ export class PriceFeed {
    * @returns a struct containing the latest available price, confidence interval and the exponent for
    * both numbers, or `undefined` if no price update occurred within `duration` seconds of the current time.
    */
-  getLatestAvailablePriceWithinDuration(duration: DurationInSeconds): Price | undefined {
+  getLatestAvailablePriceWithinDuration(
+    duration: DurationInSeconds
+  ): Price | undefined {
     const [price, timestamp] = this.getLatestAvailablePriceUnchecked();
 
     const currentTime: UnixTimestamp = Math.floor(Date.now() / 1000);
-  
+
     // This checks the absolute difference as a sanity check
     // for the cases that the system time is behind or price
-    // feed timestamp happen to be in the future (a bug). 
+    // feed timestamp happen to be in the future (a bug).
     if (Math.abs(currentTime - timestamp) > duration) {
       return undefined;
     }
 
     return price;
+  }
+
+  /**
+   * Get the price feed metadata.
+   *
+   * @returns a struct containing the attestation time, emitter chain, and the sequence number. 
+   * Returns `undefined` if metadata is currently unavailable.
+   */
+  getMetadata(): PriceFeedMetadata | undefined {
+    if (this.metadata === undefined) {
+      return undefined;
+    }
+    return new PriceFeedMetadata(this.metadata);
   }
 }

@@ -94,6 +94,14 @@
           "$ref": "#/definitions/PriceStatus"
         }
       ]
+    },
+    "metadata": {
+      "description": "Metadata about the price",
+      "allOf": [
+        {
+          "$ref": "#/definitions/PriceFeedMetadata"
+        }
+      ]
     }
   },
   "definitions": {
@@ -103,12 +111,29 @@
     "PriceStatus": {
       "description": "Represents availability status of a price feed.",
       "type": "string",
-      "enum": [
-        "Unknown",
-        "Trading",
-        "Halted",
-        "Auction"
-      ]
+      "enum": ["Unknown", "Trading", "Halted", "Auction"]
+    },
+    "PriceFeedMetadata": {
+      "description": "Represents metadata of a price feed.",
+      "type": "object",
+      "required": ["attestation_time", "emitter_chain", "sequence_number"],
+      "properties": {
+        "attestation_time": {
+          "description": "Attestation time of the price",
+          "type": "integer",
+          "format": "int64"
+        },
+        "emitter_chain": {
+          "description": "Chain of the emitter",
+          "type": "integer",
+          "format": "int16"
+        },
+        "sequence_number": {
+          "description": "Sequence number of the price",
+          "type": "integer",
+          "format": "int64"
+        }
+      }
     }
   }
 }

@@ -36,6 +36,10 @@ export interface PriceFeed {
    */
   max_num_publishers: number;
   /**
+   * Metadata about the price
+   */
+  metadata?: PriceFeedMetadata;
+  /**
    * Number of publishers that made up current aggregate.
    */
   num_publishers: number;
@@ -67,6 +71,26 @@ export interface PriceFeed {
    * Status of price (Trading is valid).
    */
   status: PriceStatus;
+}
+
+/**
+ * Metadata about the price
+ *
+ * Represents metadata of a price feed.
+ */
+export interface PriceFeedMetadata {
+  /**
+   * Attestation time of the price
+   */
+  attestation_time: number;
+  /**
+   * Chain of the emitter
+   */
+  emitter_chain: number;
+  /**
+   * Sequence number of the price
+   */
+  sequence_number: number;
 }
 
 /**
@@ -249,6 +273,11 @@ const typeMap: any = {
       { json: "expo", js: "expo", typ: 0 },
       { json: "id", js: "id", typ: "" },
       { json: "max_num_publishers", js: "max_num_publishers", typ: 0 },
+      {
+        json: "metadata",
+        js: "metadata",
+        typ: u(undefined, r("PriceFeedMetadata")),
+      },
       { json: "num_publishers", js: "num_publishers", typ: 0 },
       { json: "prev_conf", js: "prev_conf", typ: "" },
       { json: "prev_price", js: "prev_price", typ: "" },
@@ -257,6 +286,14 @@ const typeMap: any = {
       { json: "product_id", js: "product_id", typ: "" },
       { json: "publish_time", js: "publish_time", typ: 0 },
       { json: "status", js: "status", typ: r("PriceStatus") },
+    ],
+    "any"
+  ),
+  PriceFeedMetadata: o(
+    [
+      { json: "attestation_time", js: "attestation_time", typ: 0 },
+      { json: "emitter_chain", js: "emitter_chain", typ: 0 },
+      { json: "sequence_number", js: "sequence_number", typ: 0 },
     ],
     "any"
   ),
