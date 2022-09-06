@@ -1,6 +1,6 @@
 {
   "name": "@pythnetwork/pyth-sdk-js",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Pyth Network SDK in JS",
   "homepage": "https://pyth.network",
   "main": "lib/index.js",
@@ -13,7 +13,7 @@
     "test": "jest",
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\"",
-    "gen-ts-schema": "quicktype --src-lang schema src/schemas/price_feed.json -o src/schemas/PriceFeed.ts --raw-type any && prettier --write \"src/schemas/*.ts\"",
+    "gen-ts-schema": "quicktype --src-lang schema src/schemas/price_feed.json -o src/schemas/PriceFeed.ts --raw-type any --converters all-objects && prettier --write \"src/schemas/*.ts\"",
     "lint": "eslint src/",
     "prepare": "npm run build",
     "prepublishOnly": "npm test && npm run lint",
