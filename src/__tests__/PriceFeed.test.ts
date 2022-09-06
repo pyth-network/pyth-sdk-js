@@ -107,11 +107,11 @@ test("getMetadata returns PriceFeedMetadata as expected", () => {
     expo: 4,
     id: "abcdef0123456789",
     max_num_publishers: 6,
-    metadata: new PriceFeedMetadata({
+    metadata: {
       attestation_time: 7,
       emitter_chain: 8,
       sequence_number: 9,
-    }),
+    },
     num_publishers: 10,
     prev_conf: "11",
     prev_price: "12",
@@ -125,7 +125,7 @@ test("getMetadata returns PriceFeedMetadata as expected", () => {
   const priceFeed = PriceFeed.fromJson(data);
 
   expect(priceFeed.getMetadata()).toStrictEqual(
-    new PriceFeedMetadata({
+    PriceFeedMetadata.fromJson({
       attestation_time: 7,
       emitter_chain: 8,
       sequence_number: 9,

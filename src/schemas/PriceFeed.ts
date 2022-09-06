@@ -115,6 +115,14 @@ export class Convert {
   public static priceFeedToJson(value: PriceFeed): any {
     return uncast(value, r("PriceFeed"));
   }
+
+  public static toPriceFeedMetadata(json: any): PriceFeedMetadata {
+    return cast(json, r("PriceFeedMetadata"));
+  }
+
+  public static priceFeedMetadataToJson(value: PriceFeedMetadata): any {
+    return uncast(value, r("PriceFeedMetadata"));
+  }
 }
 
 function invalidValue(typ: any, val: any, key: any = ""): never {

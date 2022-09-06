@@ -1,4 +1,8 @@
-import { Convert, PriceFeed as JsonPriceFeed } from "./schemas/PriceFeed";
+import {
+  Convert,
+  PriceFeed as JsonPriceFeed,
+  PriceFeedMetadata as JsonPriceFeedMetadata,
+} from "./schemas/PriceFeed";
 
 export type UnixTimestamp = number;
 export type DurationInSeconds = number;
@@ -62,24 +66,46 @@ export class PriceFeedMetadata {
   /**
    * Attestation time of the price
    */
-  attestation_time: number;
+  attestationTime: number;
   /**
    * Chain of the emitter
    */
-  emitter_chain: number;
+  emitterChain: number;
   /**
    * Sequence number of the price
    */
-  sequence_number: number;
+  sequenceNumber: number;
 
   constructor(metadata: {
-    attestation_time: number;
-    emitter_chain: number;
-    sequence_number: number;
+    attestationTime: number;
+    emitterChain: number;
+    sequenceNumber: number;
   }) {
-    this.attestation_time = metadata.attestation_time;
-    this.emitter_chain = metadata.emitter_chain;
-    this.sequence_number = metadata.sequence_number;
+    this.attestationTime = metadata.attestationTime;
+    this.emitterChain = metadata.emitterChain;
+    this.sequenceNumber = metadata.sequenceNumber;
+  }
+
+  static fromJson(json: any): PriceFeedMetadata | undefined {
+    if (json === undefined) {
+      return undefined;
+    }
+    const jsonFeed: JsonPriceFeedMetadata = Convert.toPriceFeedMetadata(json);
+    return new PriceFeedMetadata({
+      attestationTime: jsonFeed.attestation_time,
+      emitterChain: jsonFeed.emitter_chain,
+      sequenceNumber: jsonFeed.sequence_number,
+    });
+  }
+
+  toJson(): any {
+    const jsonFeed: JsonPriceFeedMetadata = {
+      attestation_time: this.attestationTime,
+      emitter_chain: this.emitterChain,
+      sequence_number: this.sequenceNumber,
+    };
+    // this is done to avoid sending undefined values to the server
+    return Convert.priceFeedMetadataToJson(jsonFeed);
   }
 }
 
@@ -194,7 +220,7 @@ export class PriceFeed {
       expo: jsonFeed.expo,
       id: jsonFeed.id,
       maxNumPublishers: jsonFeed.max_num_publishers,
-      metadata: jsonFeed.metadata,
+      metadata: PriceFeedMetadata.fromJson(jsonFeed.metadata),
       numPublishers: jsonFeed.num_publishers,
       prevConf: jsonFeed.prev_conf,
       prevPrice: jsonFeed.prev_price,
@@ -214,7 +240,7 @@ export class PriceFeed {
       expo: this.expo,
       id: this.id,
       max_num_publishers: this.maxNumPublishers,
-      metadata: this.metadata,
+      metadata: this.metadata?.toJson(),
       num_publishers: this.numPublishers,
       prev_conf: this.prevConf,
       prev_price: this.prevPrice,
@@ -224,7 +250,6 @@ export class PriceFeed {
       publish_time: this.publishTime,
       status: this.status,
     };
-    // this is done to avoid sending undefined values to the server
     return Convert.priceFeedToJson(jsonFeed);
   }
 
@@ -318,13 +343,10 @@ export class PriceFeed {
   /**
    * Get the price feed metadata.
    *
-   * @returns a struct containing the attestation time, emitter chain, and the sequence number. 
+   * @returns a struct containing the attestation time, emitter chain, and the sequence number.
    * Returns `undefined` if metadata is currently unavailable.
    */
   getMetadata(): PriceFeedMetadata | undefined {
-    if (this.metadata === undefined) {
-      return undefined;
-    }
-    return new PriceFeedMetadata(this.metadata);
+    return this.metadata;
   }
 }
