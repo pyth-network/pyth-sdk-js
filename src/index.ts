@@ -1,5 +1,6 @@
 import {
   Convert,
+  Price as JsonPrice,
   PriceFeed as JsonPriceFeed,
   PriceFeedMetadata as JsonPriceFeedMetadata,
 } from "./schemas/PriceFeed";
@@ -9,17 +10,24 @@ export type DurationInSeconds = number;
 export type HexString = string;
 
 /**
- * A Pyth Price represented as `${price} ± ${conf} * 10^${expo}
+ * A Pyth Price represented as `${price} ± ${conf} * 10^${expo}` published at `publishTime`.
  */
 export class Price {
   conf: string;
   expo: number;
   price: string;
+  publishTime: UnixTimestamp;
 
-  constructor(conf: string, expo: number, price: string) {
-    this.conf = conf;
-    this.expo = expo;
-    this.price = price;
+  constructor(rawPrice: {
+    conf: string;
+    expo: number;
+    price: string;
+    publishTime: UnixTimestamp;
+  }) {
+    this.conf = rawPrice.conf;
+    this.expo = rawPrice.expo;
+    this.price = rawPrice.price;
+    this.publishTime = rawPrice.publishTime;
   }
 
   /**
@@ -43,18 +51,27 @@ export class Price {
   getConfAsNumberUnchecked(): number {
     return Number(this.conf) * 10 ** this.expo;
   }
-}
 
-/**
- * Status of price (Trading is valid).
- *
- * Represents availability status of a price feed.
- */
-export enum PriceStatus {
-  Auction = "Auction",
-  Halted = "Halted",
-  Trading = "Trading",
-  Unknown = "Unknown",
+  static fromJson(json: any): Price {
+    const jsonPrice: JsonPrice = Convert.toPrice(json);
+    return new Price({
+      conf: jsonPrice.conf,
+      expo: jsonPrice.expo,
+      price: jsonPrice.price,
+      publishTime: jsonPrice.publish_time,
+    });
+  }
+
+  toJson(): any {
+    const jsonPrice: JsonPrice = {
+      conf: this.conf,
+      expo: this.expo,
+      price: this.price,
+      publish_time: this.publishTime,
+    };
+    // this is done to avoid sending undefined values to the server
+    return Convert.priceToJson(jsonPrice);
+  }
 }
 
 /**
@@ -117,227 +134,146 @@ export class PriceFeedMetadata {
 
 export class PriceFeed {
   /**
-   * Confidence interval around the current aggregation price.
+   * Exponentially-weighted moving average Price
    */
-  private conf: string;
-  /**
-   * Exponentially moving average confidence interval.
-   */
-  private emaConf: string;
-  /**
-   * Exponentially moving average price.
-   */
-  private emaPrice: string;
-  /**
-   * Price exponent.
-   */
-  expo: number;
+  private emaPrice: Price;
   /**
    * Unique identifier for this price.
    */
   id: HexString;
   /**
-   * Maximum number of allowed publishers that can contribute to a price.
-   */
-  maxNumPublishers: number;
-  /**
-   * Metadata about the price
+   * Metadata of the price
    */
   metadata?: PriceFeedMetadata;
   /**
-   * Number of publishers that made up current aggregate.
+   * Price
    */
-  numPublishers: number;
-  /**
-   * Confidence interval of previous aggregate with Trading status.
-   */
-  private prevConf: string;
-  /**
-   * Price of previous aggregate with Trading status.
-   */
-  private prevPrice: string;
-  /**
-   * Publish time of previous aggregate with Trading status.
-   */
-  private prevPublishTime: UnixTimestamp;
-  /**
-   * The current aggregation price.
-   */
-  private price: string;
-  /**
-   * Product account key.
-   */
-  productId: HexString;
-  /**
-   * Current price aggregation publish time
-   */
-  publishTime: UnixTimestamp;
-  /**
-   * Status of price (Trading is valid).
-   */
-  status: PriceStatus;
+  private price: Price;
 
-  constructor(rawValues: {
-    conf: string;
-    emaConf: string;
-    emaPrice: string;
-    expo: number;
+  constructor(rawFeed: {
+    emaPrice: Price;
     id: HexString;
-    maxNumPublishers: number;
     metadata?: PriceFeedMetadata;
-    numPublishers: number;
-    prevConf: string;
-    prevPrice: string;
-    prevPublishTime: UnixTimestamp;
-    price: string;
-    productId: HexString;
-    publishTime: UnixTimestamp;
-    status: PriceStatus;
+    price: Price;
   }) {
-    this.conf = rawValues.conf;
-    this.emaConf = rawValues.emaConf;
-    this.emaPrice = rawValues.emaPrice;
-    this.expo = rawValues.expo;
-    this.id = rawValues.id;
-    this.maxNumPublishers = rawValues.maxNumPublishers;
-    this.metadata = rawValues.metadata;
-    this.numPublishers = rawValues.numPublishers;
-    this.prevConf = rawValues.prevConf;
-    this.prevPrice = rawValues.prevPrice;
-    this.prevPublishTime = rawValues.prevPublishTime;
-    this.price = rawValues.price;
-    this.productId = rawValues.productId;
-    this.publishTime = rawValues.publishTime;
-    this.status = rawValues.status;
+    this.emaPrice = rawFeed.emaPrice;
+    this.id = rawFeed.id;
+    this.metadata = rawFeed.metadata;
+    this.price = rawFeed.price;
   }
 
   static fromJson(json: any): PriceFeed {
     const jsonFeed: JsonPriceFeed = Convert.toPriceFeed(json);
     return new PriceFeed({
-      conf: jsonFeed.conf,
-      emaConf: jsonFeed.ema_conf,
-      emaPrice: jsonFeed.ema_price,
-      expo: jsonFeed.expo,
+      emaPrice: Price.fromJson(jsonFeed.ema_price),
       id: jsonFeed.id,
-      maxNumPublishers: jsonFeed.max_num_publishers,
       metadata: PriceFeedMetadata.fromJson(jsonFeed.metadata),
-      numPublishers: jsonFeed.num_publishers,
-      prevConf: jsonFeed.prev_conf,
-      prevPrice: jsonFeed.prev_price,
-      prevPublishTime: jsonFeed.prev_publish_time,
-      price: jsonFeed.price,
-      productId: jsonFeed.product_id,
-      publishTime: jsonFeed.publish_time,
-      status: jsonFeed.status,
+      price: Price.fromJson(jsonFeed.price),
     });
   }
 
   toJson(): any {
     const jsonFeed: JsonPriceFeed = {
-      conf: this.conf,
-      ema_conf: this.emaConf,
-      ema_price: this.emaPrice,
-      expo: this.expo,
+      ema_price: this.emaPrice.toJson(),
       id: this.id,
-      max_num_publishers: this.maxNumPublishers,
       metadata: this.metadata?.toJson(),
-      num_publishers: this.numPublishers,
-      prev_conf: this.prevConf,
-      prev_price: this.prevPrice,
-      prev_publish_time: this.prevPublishTime,
-      price: this.price,
-      product_id: this.productId,
-      publish_time: this.publishTime,
-      status: this.status,
+      price: this.price.toJson(),
     };
     return Convert.priceFeedToJson(jsonFeed);
   }
 
   /**
-   * Get the current price and confidence interval as fixed-point numbers of the form a * 10^e.
+   * Get the price and confidence interval as fixed-point numbers of the form a * 10^e.
    * This function returns the current best estimate of the price at the time that this `PriceFeed` was
-   * published (`publish_time`). This function returns `undefined` if the oracle was unable to determine
-   * the price at that time; this condition can happen for various reasons, such as certain markets only
-   * trading during certain times.
+   * published (`publishTime`). The returned price can be from arbitrarily far in the past; this function
+   * makes no guarantees that the returned price is recent or useful for any particular application.
    *
-   * @returns a struct containing the price and confidence interval as of `publish_time`, along with
-   * the exponent for both numbers. Returns `undefined` if price information is currently unavailable
-   * for any reason.
+   * Users of this function should check the returned `publishTime` to ensure that the returned price is
+   * sufficiently recent for their application. If you are considering using this function, it may be
+   * safer / easier to use `getPriceNoOlderThan` method.
+   *
+   * @returns a Price that contains the price and confidence interval along with
+   * the exponent for them, and publish time of the price.
    */
-  getCurrentPrice(): Price | undefined {
-    if (this.status !== PriceStatus.Trading) {
-      return undefined;
-    }
-
-    return new Price(this.conf, this.expo, this.price);
+  getPriceUnchecked(): Price {
+    return this.price;
   }
 
   /**
-   * Get the exponentially-weighted moving average price (ema_price) and a confidence interval on the result.
+   * Get the exponentially-weighted moving average (EMA) price and confidence interval.
    *
-   * @returns a struct containing the ema price, confidence interval, and the exponent for
-   * both numbers. Returns `undefined` if price information is currently unavailable for any reason.
+   * This function returns the current best estimate of the price at the time that this `PriceFeed` was
+   * published (`publishTime`). The returned price can be from arbitrarily far in the past; this function
+   * makes no guarantees that the returned price is recent or useful for any particular application.
+   *
+   * Users of this function should check the returned `publishTime` to ensure that the returned price is
+   * sufficiently recent for their application. If you are considering using this function, it may be
+   * safer / easier to use `getEmaPriceNoOlderThan` method.
    *
    * At the moment, the confidence interval returned by this method is computed in
    * a somewhat questionable way, so we do not recommend using it for high-value applications.
+   *
+   * @returns a Price that contains the EMA price and confidence interval along with
+   * the exponent for them, and publish time of the price.
    */
-  getEmaPrice(): Price | undefined {
-    return new Price(this.emaConf, this.expo, this.emaPrice);
+  getEmaPriceUnchecked(): Price {
+    return this.emaPrice;
   }
 
   /**
-   * Get the latest available price, along with the timestamp when it was generated.
-   * This function returns the same price as `getCurrentPrice` in the case where a price was available
-   * at the time this `PriceFeed` was published (`publish_time`). However, if a price was not available
-   * at that time, this function returns the price from the latest time at which the price was available.
-   * The returned price can be from arbitrarily far in the past; this function makes no guarantees that
-   * the returned price is recent or useful for any particular application.
+   * Get the price if it was updated no older than `age` seconds of the current time.
    *
-   * Users of this function should check the returned timestamp to ensure that the returned price is
-   * sufficiently recent for their application. If you are considering using this function, it may be
-   * safer / easier to use either `getCurrentPrice` or `getLatestAvailablePriceWithinDuration`.
+   * This function is a sanity-checked version of `getPriceUnchecked` which is useful in
+   * applications that require a sufficiently-recent price. Returns `undefined` if the price
+   * is not recent enough.
    *
-   * @returns a struct containing the latest available price, confidence interval, and the exponent for
-   * both numbers along with the timestamp when that price was generated.
+   * @param age return a price as long as it has been updated within this number of seconds
+   * @returns a Price struct containing the price, confidence interval along with the exponent for
+   * both numbers, and its publish time, or `undefined` if no price update occurred within `age` seconds of the current time.
    */
-  getLatestAvailablePriceUnchecked(): [Price, UnixTimestamp] {
-    // If the price status is Trading then it's the latest price
-    // with the Trading status.
-    if (this.status === PriceStatus.Trading) {
-      return [new Price(this.conf, this.expo, this.price), this.publishTime];
-    }
-
-    return [
-      new Price(this.prevConf, this.expo, this.prevPrice),
-      this.prevPublishTime,
-    ];
-  }
-
-  /**
-   * Get the latest price as long as it was updated within `duration` seconds of the current time.
-   * This function is a sanity-checked version of `getLatestAvailablePriceUnchecked` which is useful in
-   * applications that require a sufficiently-recent price. Returns `undefined` if the price wasn't
-   * updated sufficiently recently.
-   *
-   * @param duration return a price as long as it has been updated within this number of seconds
-   * @returns a struct containing the latest available price, confidence interval and the exponent for
-   * both numbers, or `undefined` if no price update occurred within `duration` seconds of the current time.
-   */
-  getLatestAvailablePriceWithinDuration(
-    duration: DurationInSeconds
-  ): Price | undefined {
-    const [price, timestamp] = this.getLatestAvailablePriceUnchecked();
+  getPriceNoOlderThan(age: DurationInSeconds): Price | undefined {
+    const price = this.getPriceUnchecked();
 
     const currentTime: UnixTimestamp = Math.floor(Date.now() / 1000);
 
     // This checks the absolute difference as a sanity check
     // for the cases that the system time is behind or price
     // feed timestamp happen to be in the future (a bug).
-    if (Math.abs(currentTime - timestamp) > duration) {
+    if (Math.abs(currentTime - price.publishTime) > age) {
       return undefined;
     }
 
     return price;
+  }
+
+  /**
+   * Get the exponentially-weighted moving average (EMA) price if it was updated no older than
+   * `age` seconds of the current time.
+   *
+   * This function is a sanity-checked version of `getEmaPriceUnchecked` which is useful in
+   * applications that require a sufficiently-recent price. Returns `undefined` if the price
+   * is not recent enough.
+   *
+   * At the moment, the confidence interval returned by this method is computed in
+   * a somewhat questionable way, so we do not recommend using it for high-value applications.
+   *
+   * @param age return a price as long as it has been updated within this number of seconds
+   * @returns a Price struct containing the EMA price, confidence interval along with the exponent for
+   * both numbers, and its publish time, or `undefined` if no price update occurred within `age` seconds of the current time.
+   */
+  getEmaPriceNoOlderThan(age: DurationInSeconds): Price | undefined {
+    const emaPrice = this.getEmaPriceUnchecked();
+
+    const currentTime: UnixTimestamp = Math.floor(Date.now() / 1000);
+
+    // This checks the absolute difference as a sanity check
+    // for the cases that the system time is behind or price
+    // feed timestamp happen to be in the future (a bug).
+    if (Math.abs(currentTime - emaPrice.publishTime) > age) {
+      return undefined;
+    }
+
+    return emaPrice;
   }
 
   /**

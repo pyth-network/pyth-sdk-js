@@ -8,73 +8,51 @@
 // match the expected interface, even if the JSON is valid.
 
 /**
- * Represents a current aggregation price from pyth publisher feeds.
+ * Represents an aggregate price from Pyth publisher feeds.
  */
 export interface PriceFeed {
   /**
-   * Confidence interval around the current aggregation price.
+   * Exponentially-weighted moving average Price
    */
-  conf: string;
-  /**
-   * Exponentially moving average confidence interval.
-   */
-  ema_conf: string;
-  /**
-   * Exponentially moving average price.
-   */
-  ema_price: string;
-  /**
-   * Price exponent.
-   */
-  expo: number;
+  ema_price: Price;
   /**
    * Unique identifier for this price.
    */
   id: string;
   /**
-   * Maximum number of allowed publishers that can contribute to a price.
-   */
-  max_num_publishers: number;
-  /**
-   * Metadata about the price
+   * Metadata of the price
    */
   metadata?: PriceFeedMetadata;
   /**
-   * Number of publishers that made up current aggregate.
+   * Price
    */
-  num_publishers: number;
-  /**
-   * Confidence interval of previous aggregate with Trading status.
-   */
-  prev_conf: string;
-  /**
-   * Price of previous aggregate with Trading status.
-   */
-  prev_price: string;
-  /**
-   * Publish time of previous aggregate with Trading status.
-   */
-  prev_publish_time: number;
-  /**
-   * The current aggregation price.
-   */
-  price: string;
-  /**
-   * Product account key.
-   */
-  product_id: string;
-  /**
-   * Current price aggregation publish time
-   */
-  publish_time: number;
-  /**
-   * Status of price (Trading is valid).
-   */
-  status: PriceStatus;
+  price: Price;
 }
 
 /**
- * Metadata about the price
+ * Represents a Pyth price
+ */
+export interface Price {
+  /**
+   * Confidence interval around the price.
+   */
+  conf: string;
+  /**
+   * Price exponent.
+   */
+  expo: number;
+  /**
+   * Price.
+   */
+  price: string;
+  /**
+   * Publish Time of the price
+   */
+  publish_time: number;
+}
+
+/**
+ * Metadata of the price
  *
  * Represents metadata of a price feed.
  */
@@ -93,18 +71,6 @@ export interface PriceFeedMetadata {
   sequence_number: number;
 }
 
-/**
- * Status of price (Trading is valid).
- *
- * Represents availability status of a price feed.
- */
-export enum PriceStatus {
-  Auction = "Auction",
-  Halted = "Halted",
-  Trading = "Trading",
-  Unknown = "Unknown",
-}
-
 // Converts JSON types to/from your types
 // and asserts the results at runtime
 export class Convert {
@@ -114,6 +80,14 @@ export class Convert {
 
   public static priceFeedToJson(value: PriceFeed): any {
     return uncast(value, r("PriceFeed"));
+  }
+
+  public static toPrice(json: any): Price {
+    return cast(json, r("Price"));
+  }
+
+  public static priceToJson(value: Price): any {
+    return uncast(value, r("Price"));
   }
 
   public static toPriceFeedMetadata(json: any): PriceFeedMetadata {
@@ -275,25 +249,23 @@ function r(name: string) {
 const typeMap: any = {
   PriceFeed: o(
     [
-      { json: "conf", js: "conf", typ: "" },
-      { json: "ema_conf", js: "ema_conf", typ: "" },
-      { json: "ema_price", js: "ema_price", typ: "" },
-      { json: "expo", js: "expo", typ: 0 },
+      { json: "ema_price", js: "ema_price", typ: r("Price") },
       { json: "id", js: "id", typ: "" },
-      { json: "max_num_publishers", js: "max_num_publishers", typ: 0 },
       {
         json: "metadata",
         js: "metadata",
         typ: u(undefined, r("PriceFeedMetadata")),
       },
-      { json: "num_publishers", js: "num_publishers", typ: 0 },
-      { json: "prev_conf", js: "prev_conf", typ: "" },
-      { json: "prev_price", js: "prev_price", typ: "" },
-      { json: "prev_publish_time", js: "prev_publish_time", typ: 0 },
+      { json: "price", js: "price", typ: r("Price") },
+    ],
+    "any"
+  ),
+  Price: o(
+    [
+      { json: "conf", js: "conf", typ: "" },
+      { json: "expo", js: "expo", typ: 0 },
       { json: "price", js: "price", typ: "" },
-      { json: "product_id", js: "product_id", typ: "" },
       { json: "publish_time", js: "publish_time", typ: 0 },
-      { json: "status", js: "status", typ: r("PriceStatus") },
     ],
     "any"
   ),
@@ -305,5 +277,4 @@ const typeMap: any = {
     ],
     "any"
   ),
-  PriceStatus: ["Auction", "Halted", "Trading", "Unknown"],
 };
