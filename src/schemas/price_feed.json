@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "PriceFeed",
-  "description": "Represents an aggregation price from Pyth publisher feeds.",
+  "description": "Represents an aggregate price from Pyth publisher feeds.",
   "type": "object",
   "required": [
     "id",
@@ -11,35 +11,19 @@
   "properties": {
     "id": {
       "description": "Unique identifier for this price.",
-      "allOf": [
-        {
-          "$ref": "#/definitions/Identifier"
-        }
-      ]
+      "$ref": "#/definitions/Identifier"
     },
     "price": {
       "description": "Price",
-      "allOf": [
-        {
-          "$ref": "#/definitions/Price"
-        }
-      ]
+      "$ref": "#/definitions/Price"
     },
     "ema_price": {
       "description": "Exponentially-weighted moving average Price",
-      "allOf": [
-        {
-          "$ref": "#/definitions/Price"
-        }
-      ]
+      "$ref": "#/definitions/Price"
     },
     "metadata": {
       "description": "Metadata of the price",
-      "allOf": [
-        {
-          "$ref": "#/definitions/PriceFeedMetadata"
-        }
-      ]
+      "$ref": "#/definitions/PriceFeedMetadata"
     }
   },
   "definitions": {

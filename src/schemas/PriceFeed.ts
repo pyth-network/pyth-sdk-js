@@ -8,7 +8,7 @@
 // match the expected interface, even if the JSON is valid.
 
 /**
- * Represents an aggregation price from Pyth publisher feeds.
+ * Represents an aggregate price from Pyth publisher feeds.
  */
 export interface PriceFeed {
   /**
@@ -30,11 +30,7 @@ export interface PriceFeed {
 }
 
 /**
- * Exponentially-weighted moving average Price
- *
  * Represents a Pyth price
- *
- * Price
  */
 export interface Price {
   /**
