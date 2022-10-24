@@ -66,9 +66,9 @@ export interface PriceFeedMetadata {
    */
   emitter_chain: number;
   /**
-   * The time the price was received
+   * The time that the price service received the price
    */
-  receive_time: number;
+  price_service_receive_time: number;
   /**
    * Sequence number of the price
    */
@@ -277,7 +277,11 @@ const typeMap: any = {
     [
       { json: "attestation_time", js: "attestation_time", typ: 0 },
       { json: "emitter_chain", js: "emitter_chain", typ: 0 },
-      { json: "receive_time", js: "receive_time", typ: 0 },
+      {
+        json: "price_service_receive_time",
+        js: "price_service_receive_time",
+        typ: 0,
+      },
       { json: "sequence_number", js: "sequence_number", typ: 0 },
     ],
     "any"

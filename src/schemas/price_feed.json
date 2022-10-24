@@ -58,7 +58,7 @@
     "PriceFeedMetadata": {
       "description": "Represents metadata of a price feed.",
       "type": "object",
-      "required": ["attestation_time", "emitter_chain", "receive_time", "sequence_number"],
+      "required": ["attestation_time", "emitter_chain", "price_service_receive_time", "sequence_number"],
       "properties": {
         "attestation_time": {
           "description": "Attestation time of the price",
@@ -70,8 +70,8 @@
           "type": "integer",
           "format": "int16"
         },
-        "receive_time": {
-          "description": "The time the price was received",
+        "price_service_receive_time": {
+          "description": "The time that the price service received the price",
           "type": "integer",
           "format": "int64"
         },
