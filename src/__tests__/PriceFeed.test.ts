@@ -67,7 +67,9 @@ test("getMetadata returns PriceFeedMetadata as expected", () => {
     metadata: {
       attestation_time: 7,
       emitter_chain: 8,
-      sequence_number: 9,
+      price_service_receive_time: 9,
+      sequence_number: 10,
+      something_else: 11, // Ensuring the code is future compatible.
     },
   };
 
@@ -77,7 +79,8 @@ test("getMetadata returns PriceFeedMetadata as expected", () => {
     PriceFeedMetadata.fromJson({
       attestation_time: 7,
       emitter_chain: 8,
-      sequence_number: 9,
+      price_service_receive_time: 9,
+      sequence_number: 10,
     })
   );
 });

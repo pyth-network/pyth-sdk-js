@@ -89,6 +89,10 @@ export class PriceFeedMetadata {
    */
   emitterChain: number;
   /**
+   * The time that the price service received the price
+   */
+  priceServiceReceiveTime: number;
+  /**
    * Sequence number of the price
    */
   sequenceNumber: number;
@@ -96,10 +100,12 @@ export class PriceFeedMetadata {
   constructor(metadata: {
     attestationTime: number;
     emitterChain: number;
+    receiveTime: number;
     sequenceNumber: number;
   }) {
     this.attestationTime = metadata.attestationTime;
     this.emitterChain = metadata.emitterChain;
+    this.priceServiceReceiveTime = metadata.receiveTime;
     this.sequenceNumber = metadata.sequenceNumber;
   }
 
@@ -111,6 +117,7 @@ export class PriceFeedMetadata {
     return new PriceFeedMetadata({
       attestationTime: jsonFeed.attestation_time,
       emitterChain: jsonFeed.emitter_chain,
+      receiveTime: jsonFeed.price_service_receive_time,
       sequenceNumber: jsonFeed.sequence_number,
     });
   }
@@ -119,6 +126,7 @@ export class PriceFeedMetadata {
     const jsonFeed: JsonPriceFeedMetadata = {
       attestation_time: this.attestationTime,
       emitter_chain: this.emitterChain,
+      price_service_receive_time: this.priceServiceReceiveTime,
       sequence_number: this.sequenceNumber,
     };
     // this is done to avoid sending undefined values to the server
