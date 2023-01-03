@@ -11,6 +11,7 @@
  * Represents an aggregate price from Pyth publisher feeds.
  */
 export interface PriceFeed {
+  [x: string]: any;
   /**
    * Exponentially-weighted moving average Price
    */
@@ -261,6 +262,11 @@ const typeMap: any = {
         typ: u(undefined, r("PriceFeedMetadata")),
       },
       { json: "price", js: "price", typ: r("Price") },
+      {
+        json: "vaa",
+        js: "vaa",
+        typ: u(undefined, ""),
+      },
     ],
     "any"
   ),

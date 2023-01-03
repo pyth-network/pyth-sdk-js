@@ -154,6 +154,10 @@ export class PriceFeed {
    */
   metadata?: PriceFeedMetadata;
   /**
+   * VAA of the price
+   */
+  vaa?: string;
+  /**
    * Price
    */
   private price: Price;
@@ -162,11 +166,13 @@ export class PriceFeed {
     emaPrice: Price;
     id: HexString;
     metadata?: PriceFeedMetadata;
+    vaa?: string;
     price: Price;
   }) {
     this.emaPrice = rawFeed.emaPrice;
     this.id = rawFeed.id;
     this.metadata = rawFeed.metadata;
+    this.vaa = rawFeed.vaa;
     this.price = rawFeed.price;
   }
 
@@ -176,6 +182,7 @@ export class PriceFeed {
       emaPrice: Price.fromJson(jsonFeed.ema_price),
       id: jsonFeed.id,
       metadata: PriceFeedMetadata.fromJson(jsonFeed.metadata),
+      vaa: jsonFeed.vaa,
       price: Price.fromJson(jsonFeed.price),
     });
   }
@@ -292,5 +299,15 @@ export class PriceFeed {
    */
   getMetadata(): PriceFeedMetadata | undefined {
     return this.metadata;
+  }
+
+  /**
+   * Get the price feed vaa.
+   *
+   * @returns vaa in base64.
+   * Returns `undefined` if vaa is unavailable.
+   */
+  getVAA(): string | undefined {
+    return this.vaa;
   }
 }
