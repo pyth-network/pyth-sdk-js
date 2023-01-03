@@ -23,7 +23,7 @@
     },
     "vaa": {
       "description": "VAA of the price",
-      "$ref": "#/definitions/Price"
+      "$ref": "#/definitions/Identifier"
     }
   },
   "definitions": {
