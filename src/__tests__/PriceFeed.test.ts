@@ -84,3 +84,28 @@ test("getMetadata returns PriceFeedMetadata as expected", () => {
     })
   );
 });
+
+test("getVAA returns string as expected", () => {
+  const data = {
+    ema_price: {
+      conf: "2",
+      expo: 4,
+      price: "3",
+      publish_time: 11,
+    },
+    id: "abcdef0123456789",
+    price: {
+      conf: "1",
+      expo: 4,
+      price: "10",
+      publish_time: 11,
+    },
+    vaa: "abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdef",
+  };
+
+  const priceFeed = PriceFeed.fromJson(data);
+
+  expect(priceFeed.getVAA()).toStrictEqual(
+    "abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdef"
+  );
+});

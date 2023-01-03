@@ -3,11 +3,7 @@
   "title": "PriceFeed",
   "description": "Represents an aggregate price from Pyth publisher feeds.",
   "type": "object",
-  "required": [
-    "id",
-    "price",
-    "ema_price"
-  ],
+  "required": ["id", "price", "ema_price"],
   "properties": {
     "id": {
       "description": "Unique identifier for this price.",
@@ -24,6 +20,10 @@
     "metadata": {
       "description": "Metadata of the price",
       "$ref": "#/definitions/PriceFeedMetadata"
+    },
+    "vaa": {
+      "description": "VAA of the price",
+      "$ref": "#/definitions/Identifier"
     }
   },
   "definitions": {
@@ -52,13 +52,18 @@
           "description": "Publish Time of the price",
           "type": "integer",
           "format": "int64"
-        }    
+        }
       }
     },
     "PriceFeedMetadata": {
       "description": "Represents metadata of a price feed.",
       "type": "object",
-      "required": ["attestation_time", "emitter_chain", "price_service_receive_time", "sequence_number"],
+      "required": [
+        "attestation_time",
+        "emitter_chain",
+        "price_service_receive_time",
+        "sequence_number"
+      ],
       "properties": {
         "attestation_time": {
           "description": "Attestation time of the price",

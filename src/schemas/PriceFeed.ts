@@ -27,10 +27,18 @@ export interface PriceFeed {
    * Price
    */
   price: Price;
+  /**
+   * VAA of the price
+   */
+  vaa?: string;
 }
 
 /**
+ * Exponentially-weighted moving average Price
+ *
  * Represents a Pyth price
+ *
+ * Price
  */
 export interface Price {
   /**
@@ -261,6 +269,7 @@ const typeMap: any = {
         typ: u(undefined, r("PriceFeedMetadata")),
       },
       { json: "price", js: "price", typ: r("Price") },
+      { json: "vaa", js: "vaa", typ: u(undefined, "") },
     ],
     "any"
   ),
